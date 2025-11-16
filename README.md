@@ -87,7 +87,7 @@ but since AFPP is applied before the normal preprocessor if they do interact the
 
 ### Language Servers
 
-Language servers won't understand what you're doing so if you're using AFPP, your IDE will likely report an error on every place an anonymous function is defined.
+Language servers won't understand what you're doing. So if you're using AFPP, your IDE will likely report an error on every place an anonymous function is defined.
 Though with `clangd` I've noticed that if you assign it to a function pointer variable you'll only get an error on the assignment and not in the other places of your code.
 
 Trust the AFPP error/warnings and your compiler and everything should be good.
