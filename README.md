@@ -22,7 +22,7 @@ int main(void){
 }
 ```
 
-Then to compile this example you first have to pass the file through AFPP and then compile the output file named like `<og name>.afpp.c`.
+Then to compile this example you first have to pass the file through AFPP and then compile the output file named like `<og_name>.afpp.c`.
 
 ```sh
 afpp example.c && cc -o example example.c.afpp.c
