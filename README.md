@@ -28,7 +28,7 @@ Then to compile this example you first have to pass the file through AFPP and th
 mkdir build && afpp -d build example.c && cc -o build/example build/example.c.afpp.c
 ```
 
-Essentially what AFPP does is it scans for the pattern `[]<return type>(args){ function body }` and seperates it into a prototype, call and implementation.
+Essentially what AFPP does is it scans for the pattern `[]< return-type >( function-args ){ function-body }` and seperates it into a prototype, call and implementation.
 All generated prototypes are appended at the beginning or 'head' of the file, calls are replaced inline in the 'body' of the file and implementations are appended at the end or 'tail' of the file.
 
 The resulting output looks like this:
