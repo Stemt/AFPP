@@ -25,7 +25,7 @@ int main(void){
 Then to compile this example you first have to pass the file through AFPP and then compile the output file named like `<og_name>.afpp.c`.
 
 ```sh
-afpp example.c && cc -o example example.c.afpp.c
+mkdir build && afpp -d build example.c && cc -o build/example build/example.c.afpp.c
 ```
 
 Essentially what AFPP does is it scans for the pattern `[]<return type>(args){ function body }` and seperates it into a prototype, call and implementation.
