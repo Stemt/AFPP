@@ -12,6 +12,7 @@ typedef enum{
   AF_CURLY_CLOSE,
   AF_ANGLE_OPEN,
   AF_ANGLE_CLOSE,
+  AF_WHITESPACE
 } AF_TokenKind;
 
 const char* AF_TokenKind_str(AF_TokenKind kind){
@@ -26,6 +27,7 @@ const char* AF_TokenKind_str(AF_TokenKind kind){
     case AF_CURLY_CLOSE: return "AF_CURLY_CLOSE";
     case AF_ANGLE_OPEN: return "AF_ANGLE_OPEN";
     case AF_ANGLE_CLOSE: return "AF_ANGLE_CLOSE";
+    case AF_WHITESPACE: return "AF_WHITESPACE";
   }
   return "<invalid AF_TokenKind>";
 }
@@ -90,6 +92,16 @@ AF_Token af_lexer_next(AF_Lexer* self){
 
   if(token.kind != AF_UNKNOWN){
     self->curr++;
+  }else if(af_lexer_is_whitespace(*self->curr)){
+    // this feels sort of inconsistent but I cant be arsed to create a proper C + 
+    //    C preprocessor lexer/parser as to prevent consumption of whitespace in 
+    //    the right areas
+    token.kind = AF_WHITESPACE;
+    while(self->curr < self->end
+        && af_lexer_is_whitespace(*self->curr)
+    ){
+      self->curr++;
+    }
   }else if(self->curr < self->end){
     while(self->curr < self->end
         && af_lexer_id_token(self) == AF_UNKNOWN
@@ -141,10 +153,13 @@ bool preprocess_content(
     }
 
     nob_log(NOB_INFO, "possible start of anon func: '%.*s'", 16, token.start);
+
+    // note the careful usage of whitespace consumption
+    // in most areas we want to leave it where it is
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_SQUARE_CLOSE) == false){
 
-      // check if the user is attempting to treat anon func as lambda
-
+      // check if the user is attempting to treat anon func as a C++ lambda
       AF_Token token = lexer.token;
       while(token.kind != AF_SQUARE_CLOSE){
         token = af_lexer_next(&lexer);
@@ -153,10 +168,11 @@ bool preprocess_content(
           continue;
         }
       }
+      if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
       if(af_lexer_next_is(&lexer, AF_ANGLE_OPEN)){
-        nob_log(NOB_WARNING, "arg found in square brace, not anon func: %.*s\n"
+        nob_log(NOB_WARNING, "arg found in square brace, not anon func: '%.*s...'\n"
             "If you're attempting to create a lambda that captures variables: this is not supported\n"
-            , 16, lexer.token.start);
+            , 16, start);
       }
       nob_log(NOB_INFO, "not valid anon func syntax: %.*s", 32, start);
       nob_sb_append_buf(out_body, start, lexer.token.end-start);
@@ -164,12 +180,14 @@ bool preprocess_content(
     }
 
 
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_ANGLE_OPEN) == false){
       nob_log(NOB_INFO, "no angle brackets for return type, not anon func");
       nob_sb_append_buf(out_body, start, lexer.token.end-start);
       continue;
     }
 
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_UNKNOWN) == false){
       nob_log(NOB_ERROR, "expected return type, got %.*s", (int)(lexer.token.end - lexer.token.start), lexer.token.start);
       continue;
@@ -177,15 +195,18 @@ bool preprocess_content(
 
     AF_Token return_type = lexer.token;
     
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_ANGLE_CLOSE) == false){
       nob_log(NOB_ERROR, "expected '>', got '%.*s'", 16, lexer.curr);
       continue;
     }
     
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_ROUND_OPEN) == false) continue;
     nob_log(NOB_INFO, "start of arguments: '%.*s'", 16, lexer.token.start);
 
     AF_Token args = {0};
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_UNKNOWN)){
       nob_log(NOB_INFO, "got arguments: '%.*s'", (int)(lexer.token.end - lexer.token.start), lexer.token.start);
       args = lexer.token;
@@ -201,6 +222,7 @@ bool preprocess_content(
       continue;
     }
 
+    if(af_lexer_next_is(&lexer, AF_WHITESPACE)){}; // consume
     if(af_lexer_next_is(&lexer, AF_CURLY_OPEN) == false){
       nob_log(NOB_ERROR, "expected '{' got '%s'", lexer.curr);
       continue;
@@ -359,6 +381,7 @@ int main(int argc, char** argv){
       const char* res = preprocess_file(argv[i], output_dir);
       if(res == NULL){
         nob_log(NOB_ERROR, "failed to preprocess: %s",argv[i]);
+        return 1;
       }else{
         nob_log(NOB_INFO, "succesfully preprocessed: %s", argv[i]);
       }
