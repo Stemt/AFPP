@@ -340,6 +340,7 @@ RET:
   if(out.items != NULL) nob_sb_free(out);
   if(out_head.items != NULL) nob_sb_free(out_head);
   if(out_body.items != NULL) nob_sb_free(out_body);
+  if(out_tail.items != NULL) nob_sb_free(out_tail);
   return result;
 }
 
