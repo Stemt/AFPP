@@ -82,7 +82,7 @@ Trust the AFPP error/warnings and your compiler and everything should be good.
 
 ## FAQ
 
-### Is this production read?
+### Is this production ready?
 
 Haha no, this was a hobby project slapped together in a weekend, use this at your own risk.
 
