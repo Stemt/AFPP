@@ -63,12 +63,14 @@ int afpp__example_c_anon_func_0(int a, int b){
 
 The syntax was purely chosen because the pattern is easy to identify in normal C code.
 
-Capturing variables is supported.
+So unlike in C++ capturing variables is not supported.
 
 ### Text Only Processing
 
 Because AFPP is a preprocessor purely working by searching and replacing text patterns the scope of its error reporting is limited.
 Though I've noticed that the compiler often is able to give you enough information to fix a problem.
+
+This also why you need to specify the return type for the anonymous function, as the preprocessor does not have the type information that a proper compiler would have.
 
 I've also not tested much how AFPP interacts with the normal C pre-processor, AFPP tries to leave everything apart from the anonoymous function syntax alone,
 but since AFPP is applied before the normal preprocessor if they do interact the results are likely to be unexpected.
