@@ -1,5 +1,7 @@
 # AFPP
 
+The Anonymous Function Pre-Processor for C.
+
 ## Simple Example
 
 Using AFPP one can define an anonymous function like so.
